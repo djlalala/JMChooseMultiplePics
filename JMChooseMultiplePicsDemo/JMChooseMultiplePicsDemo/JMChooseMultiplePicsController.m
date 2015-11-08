@@ -42,6 +42,10 @@
 /** 已选图片 */
 @property(strong,nonatomic)NSMutableArray *selectPics;
 
+/** 选中indexPath */
+
+@property(strong,nonatomic)NSMutableArray *selIndexPaths;
+
 /** 可选最大数量图片 */
 
 @property(assign,nonatomic)int maxSelectPic;
@@ -54,7 +58,7 @@
 
 @property(strong,nonatomic)JMToolBar *toolBar;
 
-/**rightBarButtonItem */
+/**rightBarButtonItem（可自定义其它内容） */
 @property(weak,nonatomic)UILabel *picLabel;
 
 @end
@@ -63,6 +67,17 @@
 
 
 #pragma mark -懒加载
+
+- (NSMutableArray *)selIndexPaths
+{
+    if (!_selIndexPaths) {
+        self.selIndexPaths = [NSMutableArray array];
+    }
+    return _selIndexPaths;
+}
+
+
+
 - (ALAssetsGroup *)assetsGroup
 {
     if (!_assetsGroup) {
@@ -265,7 +280,7 @@
     ALAsset *tpAsset = [_assets objectAtIndex:indexPath.row];
     BOOL isSelect = [self.selectPics containsObject:tpAsset];
     //设置cell内容
-    [cell setCollectionViewCellWithAsset:[self.assets objectAtIndex:indexPath.row] isSelect:isSelect indexPath:indexPath];
+    [cell setCollectionViewCellWithAsset:[self.assets objectAtIndex:indexPath.row] isSelect:isSelect indexPath:indexPath assets:self.selectPics];
     return cell;
 }
 
@@ -298,7 +313,9 @@
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"select");
+    [self selectIconButtonIsTouch:indexPath];
+    
+    
 }
 
 
@@ -321,6 +338,7 @@
         if (self.selectPics.count < self.maxSelectPic)
         {
             [self.selectPics addObject:tpAsset];
+            [self.selIndexPaths addObject:indexPath];
             needChangeState = YES;
         }
         else
@@ -334,9 +352,12 @@
     if (needChangeState == YES)
     {
         //需要对单个的collectionViewCell进行更新
-        NSArray *indePathArray = [NSArray arrayWithObjects:indexPath, nil];
-        [self.collectionView reloadItemsAtIndexPaths:indePathArray];
-
+        
+//        NSArray *indePathArray = [NSArray arrayWithObjects:indexPath, nil];
+        [self.collectionView reloadItemsAtIndexPaths:self.selIndexPaths];
+        if (containsObject==YES) {
+            [self.selIndexPaths removeObject:indexPath];
+        }
         //更改toolbar的状态
         if (self.selectPics.count >0)
             
@@ -351,6 +372,7 @@
             self.toolBar.buttonCanTouch = NO;
         }
     }
+    
 }
 
 
@@ -364,6 +386,7 @@
     [self.menu dismiss];
     self.assetsGroup=assetsGroup;
     [self.selectPics removeAllObjects];
+    [self.selIndexPaths removeAllObjects];
     [self getImages];
     self.picLabel.text=@"未选";
     self.toolBar.buttonCanTouch=NO;
@@ -425,7 +448,7 @@
 
 - (void)toolbar:(JMToolBar *)toolbar finishButtonIsTouch:(UIButton *)btn{
     
-    NSLog(@"sdcs");
+    NSLog(@"这里存着已经选了的图片");
    
     //保存已选图片
     NSMutableArray *tpImageArray = [NSMutableArray array];

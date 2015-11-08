@@ -40,7 +40,7 @@
  *  @param indexPath cell的indexPath
  */
 
--(void)setCollectionViewCellWithAsset:(ALAsset *)asset isSelect:(BOOL)isSelect indexPath:(NSIndexPath *)indexPath;
+-(void)setCollectionViewCellWithAsset:(ALAsset *)asset isSelect:(BOOL)isSelect indexPath:(NSIndexPath *)indexPath assets:(NSArray *)assets;
 
 
 @end
